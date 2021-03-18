@@ -2,16 +2,19 @@ package com.example.noteapp.ui.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.*
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.example.noteapp.data.Note
 import com.example.noteapp.data.NoteRepository
 import com.example.noteapp.ultis.Resource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class NoteViewModel(application: Application) : ViewModel() {
 
     private val noteRepository: NoteRepository = NoteRepository(application)
-
+    //room
     fun insertNote(note: Note) = viewModelScope.launch {
         noteRepository.insertNote(note)
     }
@@ -33,8 +36,10 @@ class NoteViewModel(application: Application) : ViewModel() {
     fun insertAllNoteToDatabase(notes:List<Note>) = viewModelScope.launch {
         noteRepository.insertAllNoteToDatabase(notes)
     }
+    //retrofit
 
-    fun getNotesFromApi() = liveData(Dispatchers.IO) {
+    //get note use livedata
+   /* fun getNotesFromApi() = liveData(Dispatchers.IO) {
         emit(Resource.loading(null))
         try {
             emit(Resource.success(noteRepository.getNotesFromApi()))
@@ -42,6 +47,12 @@ class NoteViewModel(application: Application) : ViewModel() {
             emit(Resource.error(null, ex.message ?: "Error"))
         }
     }
+*/
+    //get note use paging
+    fun getNotesFromApi(): Flow<PagingData<Note>> {
+        return noteRepository.getNotesFromApi().cachedIn(viewModelScope)
+    }
+
 
     fun addNoteToServer(note: Note) = liveData(Dispatchers.IO) {
         emit(Resource.loading(null))
